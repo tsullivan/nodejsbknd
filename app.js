@@ -3,6 +3,7 @@
 process.q = require('q');
 process.request = require('request');
 process.backand = require("./node_custom/backand.js");
+process.env.APP_CREDENTIALS_FILE = "./credentials.js";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // BACKAND
@@ -17,23 +18,37 @@ try {
 		appname: ''
 	};
 }
+
 process.backand.auth(process.secret.backand).then(function(){
 	// get
 	var get = {
-		pageSize: 1,
-		pageNumber: 1,
-		returnObject: true
+		pageSize: 10,
+		pageNumber: 1
 	};
-	process.backand.get('/1/objects/advertisement', get).then(function(data){
-		console.log('GOT: ',data);
+	process.backand.get('/1/objects/items', get).then(function(data){
+		console.log('GET: ',data);
 	});
-	// post
-	var post = {
-		"agency": 5,
-		"channel": 2,
-		"marketing_campaign": 2
-	};
-	process.backand.post('/1/objects/advertisement?returnObject=true', post).then(function(data){
-		console.log('POSTED: ',data);
-	});
+
+  //post
+  var post={
+    "name":"my query",
+    "sQL":"select * from items",
+    "parameters":"",
+    "workspaceID":0,
+    "precedent":false
+  }
+  process.backand.post('/1/query/config', post, true).then(function(data){
+    console.log('POST: ',data);
+
+    //update the query - put
+    var put = {
+      "name":"my query-" + Math.floor(Math.random() * 10 + 1)
+    };
+
+    process.backand.put('/1/query/config/' + data.iD, put).then(function(data){
+      console.log('PUT: ',data);
+    });
+  });
+
+
 });
