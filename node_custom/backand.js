@@ -33,7 +33,7 @@ exports.auth = function(settings){
 			if (!data) {
 				return false;
 			}
-			backand.settings.access_token = data.access_token;
+			backand.settings.access_token = 'Bearer '+data.access_token;
 		}
 	);
 	return deferred.promise;
@@ -42,16 +42,21 @@ exports.auth = function(settings){
 exports.get = function(uri, data){
 	var backand = this;
 	var deferred = process.q.defer();
-	var get = '';
 	if (data) {
-		get += '?'+toQueryString(data);
+		data = '?'+toQueryString(data);
 	}
-	var headers = {
-		auth: {
-			'bearer': backand.settings.access_token
-		}
-	};
-	process.request.get('https://api.backand.com'+uri+get, headers, function(error, response, data) {
+
+  process.request(
+    {
+      method: 'GET',
+      url: 'https://api.backand.com' + uri + data,
+      json:{},
+      headers: {
+        'Authorization': backand.settings.access_token
+      }
+    }
+  ,
+  function(error, response, data) {
 		data = backand.handleResponse(deferred, error, response, data)
 		if (!data) {
 			return false;
@@ -60,16 +65,17 @@ exports.get = function(uri, data){
 	return deferred.promise;
 };
 
-exports.post = function(uri, data){
+exports.post = function(uri, json, returnObject){
 	var backand = this;
 	var deferred = process.q.defer();
+  var ret = returnObject ? '?returnObject=true' : '';
 	process.request(
 		{
 			method: 'POST',
-			url: 'https://api.backand.com'+uri, 
-			data: data,
+			url: 'https://api.backand.com'+ uri + ret,
+      json: json,
 			headers: {
-				'Authorization': 'Bearer '+backand.settings.access_token,
+				'Authorization': backand.settings.access_token
 			}
 		},
 		function(error, response, data) {
@@ -80,6 +86,28 @@ exports.post = function(uri, data){
 		}
 	);
 	return deferred.promise;
+};
+
+exports.put = function(uri, json){
+  var backand = this;
+  var deferred = process.q.defer();
+  process.request(
+      {
+        method: 'PUT',
+        url: 'https://api.backand.com'+uri,
+        json: json,
+        headers: {
+          'Authorization': backand.settings.access_token
+        }
+      },
+      function(error, response, data) {
+        data = backand.handleResponse(deferred, error, response, data)
+        if (!data) {
+          return false;
+        }
+      }
+  );
+  return deferred.promise;
 };
 
 exports.handleResponse = function(deferred, error, response, data){
@@ -95,7 +123,10 @@ exports.handleResponse = function(deferred, error, response, data){
 		return false;
 	}
 	if (data) {
-		data = JSON.parse(data);
+    try{
+		  data = JSON.parse(data);
+    }
+    catch(e){}
 		deferred.resolve(data);
 		return data;
 	}
