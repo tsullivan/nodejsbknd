@@ -1,12 +1,22 @@
 {
-  "name": "Paul-Shorey-Dev",
+  "name": "nodejsbknd",
   "version": "1.0.0",
-  "description": "Nothing much",
+  "description": "NodeJS module to allow use of BackAnd APIs",
   "author": "Paul Shorey",
   "dependencies": {
-    "q": "latest",
-    "request": "latest"
+    "q": "^1.4.1",
+    "request": "^2.67.0"
   },
-  "devDependencies": {
-  }
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/backand/nodejsbknd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/backand/nodejsbknd/issues"
+  },
+  "homepage": "https://github.com/backand/nodejsbknd#readme"
 }
